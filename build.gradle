@@ -1,0 +1,66 @@
+buildscript {
+    ext {
+        springBootVersion = '2.6.13'
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.6.13")
+    }
+}
+plugins {
+    id 'org.springframework.boot' version '2.6.13'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'java'
+}
+//用于添加Java插件,以及一些内置任务，打包jar就要用到这里的插件
+apply plugin: 'java'
+//用于把项目构建成idea项目
+apply plugin: 'idea'
+
+group = 'life.wangzhen'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'life.wangzhen.navigation.NavigationApplication'
+        )
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from{
+        (configurations.runtimeClasspath).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+repositories {
+    maven {
+        url 'https://maven.aliyun.com/repository/public/'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+tasks.withType(Copy){
+    filesMatching("**/*.proto") {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+}
